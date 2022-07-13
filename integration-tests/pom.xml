@@ -73,6 +73,12 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>software.tnb</groupId>
+      <artifactId>system-x-slack</artifactId>
+      <version>0.0.2</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>com.epam.reportportal</groupId>
       <artifactId>agent-java-cucumber6</artifactId>
       <scope>test</scope>

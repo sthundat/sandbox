@@ -1,48 +1,34 @@
 package com.redhat.service.smartevents.integration.tests.resources;
 
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.util.List;
+
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.redhat.service.smartevents.integration.tests.common.Utils;
 
-import io.restassured.http.ContentType;
+import io.cucumber.java.BeforeAll;
 
-import static io.restassured.RestAssured.given;
+import software.tnb.common.service.ServiceFactory;
+import software.tnb.slack.service.Slack;
+import software.tnb.slack.validation.MessageRequestConfig;
 
 public class SlackResource {
 
-    private final static String SLACK_URI = "https://slack.com/api/conversations.history";
-    private final static String SLACK_CHANNEL = Utils.getSystemProperty("slack.channel");
-    private final static String SLACK_TOKEN = Utils.getSystemProperty("slack.webhook.token");
-    private final static String SLACK_WEBHOOK = Utils.getSystemProperty("slack.webhook.url");
+    private final static String SLACK_CHANNEL_NAME = Utils.getSystemProperty("slack.channel.name");
 
-    public static List<String> getListOfSlackMessages() {
-        final ZonedDateTime oneHourAgo = ZonedDateTime.now(ZoneOffset.UTC).minusHours(1);
-        return given()
-                .auth()
-                .oauth2(SLACK_TOKEN)
-                .contentType(ContentType.JSON)
-                .queryParam("channel", SLACK_CHANNEL)
-                .queryParam("oldest", oneHourAgo.toEpochSecond())
-                .when()
-                .get(SLACK_URI)
-                .then()
-                .log().ifValidationFails()
-                .statusCode(200)
-                .extract()
-                .jsonPath()
-                .getList("messages.text");
+    @RegisterExtension
+    public static Slack slack = ServiceFactory.create(Slack.class);
+
+    @BeforeAll()
+    public static void loadSlackProperties() throws Exception {
+        slack.beforeAll(null);
     }
 
-    public static int postToSlackWebhookUrl(final String message) {
-        return given()
-                .auth()
-                .oauth2(SLACK_TOKEN)
-                .contentType(ContentType.JSON)
-                .body("{\"text\": \"" + message + "\"}")
-                .when()
-                .post(SLACK_WEBHOOK)
-                .getStatusCode();
+    public static List<String> getListOfSlackMessages() {
+        return slack.validation().getMessages(new MessageRequestConfig().setChannelName(SLACK_CHANNEL_NAME).setLimit(5));
+    }
+
+    public static void postToSlackWebhookUrl(final String message) {
+        slack.validation().sendMessageToChannelName(message, slack.account().channel(SLACK_CHANNEL_NAME));
     }
 }

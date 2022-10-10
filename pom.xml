@@ -47,7 +47,9 @@
     <module>shard-operator</module>
     <module>infra</module>
     <module>rhoas-client</module>
-      <module>test-commons</module>
+      <module>integration-tests/test-commons</module>
+      <module>integration-tests/manager-integration-tests</module>
+      <module>integration-tests/shard-operator-integration-tests</module>
   </modules>
 
   <profiles>
@@ -61,8 +63,8 @@
         <activeByDefault>true</activeByDefault>
       </activation>
       <modules>
-        <module>shard-operator-integration-tests</module>
-        <module>integration-tests</module>
+        <module>integration-tests/shard-operator-integration-tests</module>
+        <module>integration-tests/manager-integration-tests</module>
         <module>use-cases</module>
       </modules>
     </profile>
